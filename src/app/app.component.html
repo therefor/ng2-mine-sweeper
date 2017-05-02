@@ -1,4 +1,12 @@
-<mine-grid></mine-grid>
-<div *ngFor="let hero of heroes; let i=index; let odd=odd; trackBy: trackById" [class.odd]="odd">
-  ({{i}}) {{hero.name}}
+<div class="inline" *ngFor="let x of numArr(xLength)">
+  <mine-grid *ngFor="let y of numArr(yLength)"
+             (leftClick) = 'leftClick($event)'
+             (rightClick) = 'rightClick($event)'
+            [hasMine] = 'hasMine[coord(x,y)]'
+            [unCovered] = 'unCovered[coord(x,y)]'
+            [count]="count[coord(x,y)]"
+            [coord]='coord(x,y)'>
+  </mine-grid>
 </div>
+<div>totalMine:{{totalMine}}</div>
+<div>leftMine:{{ totalMine - flagTag }}</div>
