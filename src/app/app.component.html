@@ -1,3 +1,4 @@
-<h1>
-  {{title}}
-</h1>
+<mine-grid></mine-grid>
+<div *ngFor="let hero of heroes; let i=index; let odd=odd; trackBy: trackById" [class.odd]="odd">
+  ({{i}}) {{hero.name}}
+</div>

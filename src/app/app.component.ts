@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MineGrid } from 'grid.component';
+import { MineGrid } from './grid.component';
 
 @Component({
   selector: 'app-root',
@@ -7,5 +7,6 @@ import { MineGrid } from 'grid.component';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'app works!';
+  xLength: number = 10;
+  yLength: number = 10;
 }
