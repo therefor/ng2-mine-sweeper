@@ -1,1 +1,4 @@
-<span (contextmenu)="onClick()" (click)="onLeftClick()" [ngStyle]="{ color: hasMine? 'red': 'green'}"> {{count}}</span>
+<span class="grid"
+      (contextmenu)="onClick()"
+      (click)="onLeftClick()"
+      [ngStyle]="currentStyles" > {{count}}</span>
