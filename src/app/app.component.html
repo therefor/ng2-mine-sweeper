@@ -1,13 +1,17 @@
-<div class="inline" *ngFor="let x of numArr(xLength)">
+<div class="inline center" *ngFor="let x of numArr(xLength)">
   <mine-grid *ngFor="let y of numArr(yLength)"
              (leftClick) = 'leftClick($event)'
              (rightClick) = 'rightClick($event)'
             [hasMine] = 'hasMine[coord(x,y)]'
-            [unCovered] = 'unCovered[coord(x,y)]'
             [count]="count[coord(x,y)]"
             [coord]='coord(x,y)'
+             [isFlag]="isFlag[coord(x,y)]"
+             [restart]="restart"
              [isOpen]="isOpen[coord(x,y)]">
   </mine-grid>
 </div>
-<div>totalMine:{{totalMine}}</div>
-<div>leftMine:{{ totalMine - flagTag }}</div>
+<div class="center flex">
+  <span>Mine: {{ totalMine - flagTag }}</span>
+  <span>time: {{time.toFixed(1)}}</span>
+  <button (click)="initGame()">restart</button>
+</div>

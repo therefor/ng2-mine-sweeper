@@ -9,14 +9,18 @@ import { MineGrid } from './grid.component';
 export class AppComponent {
   xLength: number = 10;
   yLength: number = 10;
-  rate:number= 0.5555;
-  unCovered={};
+  rate:number= 0.1; //雷的数量概率
   hasMine={};
   count={};
   isOpen={};
+  isFlag={};//是否标记为地雷
   totalMine: number = 0;
   flagTag: number = 0; //标记旗子的个数
   firstClick: boolean = true;
+  time:number = 0;
+  nIntervalId:any;
+  restart: boolean = true;
+  gameInPlay: boolean = false;
 
   numArr(x:any){
     let numArr = [];
@@ -26,38 +30,102 @@ export class AppComponent {
     return numArr;
   }
   coord(x:any, y:any){
+    //返回坐标
     x = x < 10 ? "0" + x: x.toString();
     y = y< 10 ? "0" + y: y.toString();
     return x + y;
   }
   leftClick( index: string){
     if ( this.firstClick ){
-      //do something to avoid boom at first click
+      //todo: do something to avoid boom at first click
       this.firstClick = false;
+      this.startTimeCounting();
+      this.gameInPlay = true;
     }
-    console.log( "index:" + index );
-    this.hasMine[index] = true;
-    this.count[index] = 9;
+    if ( !this.gameInPlay ){ return; }
+    if( this.hasMine[index] ) {
+      //lose game
+      clearInterval(this.nIntervalId);
+      alert("game over!");
+      this.openAll();
+      this.gameInPlay = false;
+      this.restart = false;
+      return;
+    }
+    if( this.isFlag[ index ]){
+      return;
+    }
+    this.restart = false;
     this.isOpen[index] = true;
-    console.log("child component click left")
+    if( this.ifWin() ){
+      clearInterval(this.nIntervalId);
+      alert( "you win! total time is: " + this.time.toFixed(1));
+      this.gameInPlay = false;
+    }
+    if( this.count[index] === 0 ){
+      //打开0地雷的周边所有格子
+      this.open( index );
+    }
   }
-  rightClick( index: string){
-    console.log( index );
-    console.log("child component click right")
-    this.flagTag++;
+  rightClick( index: string ){
+    this.restart = false;
+    this.isFlag[ index ] = !this.isFlag[ index ];//toggle between true and false
+    if ( this.isFlag[ index ] ) {
+      this.flagTag++;
+    }else {
+      this.flagTag--;
+    }
   }
-  ngOnInit(){
-    //console.log("yers");
+  open(index){
+    //递归打开0地雷及其周围的空格
+    if( this.count[index]===0){
+      let arr = this.decodeCoord(index);
+      let x = arr[0];
+      let y = arr[1];
+      for(let i = x -1; i< x + 2; i++){
+        for( let j = y-1; j < y + 2; j++){
+          let tempIndex = this.coord( i, j );
+          if( !this.count.hasOwnProperty( tempIndex ) ){ continue; }
+          if( this.isFlag[ tempIndex ] ) { continue; }
+          if( this.count[tempIndex] === 0 && this.isOpen[ tempIndex ] === false){
+              this.isOpen[ tempIndex ] = true;
+              this.open(tempIndex);
+          }
+            this.isOpen[ tempIndex ] = true;
+        }
+      }
+    }
+  }
+  openAll(){
     for ( let i = 0; i < this.xLength; i++){
       for ( let j = 0; j < this.yLength; j++) {
         let tempCoord = this.coord(i, j);
-        this.unCovered[tempCoord] = false;
-        this.hasMine[tempCoord] = Math.random() * this.rate > 0.5? true: false;
-        this.isOpen[tempCoord]=false;
+        this.isOpen[ tempCoord ] = true;
+      }
+    }
+  }
+  decodeCoord(index:string){
+    return [parseInt(index.substring(0,2)), parseInt(index.substring(2,4))];
+  }
+  initGame(){
+    this.firstClick = true;
+    this.time = 0;
+    this.totalMine = 0;
+    this.flagTag = 0;
+    this.restart = true;
+    this.gameInPlay = false;
+    this.stopTime();
+    for ( let i = 0; i < this.xLength; i++){
+      for ( let j = 0; j < this.yLength; j++) {
+        let tempCoord = this.coord(i, j);
+        this.isFlag[ tempCoord ] = false;
+        this.hasMine[tempCoord] = Math.random() > 1 - this.rate? true: false;//set mine percentage here
+        this.isOpen[tempCoord] = false;
         if( this.hasMine[tempCoord]) { this.totalMine ++; }
         this.count[tempCoord] = 0;
       }
     }
+    //统计每个格子周围地雷数量
     for ( let i = 0; i < this.xLength; i++){
       for ( let j = 0; j < this.yLength; j++) {
         let countCoord = this.coord(i, j);
@@ -73,5 +141,32 @@ export class AppComponent {
         }
       }
     }
+  }
+  ifWin(){
+    let isAllNumberOpened = true;
+    for ( let i= 0; i< this.xLength; i++){
+      for( let j = 0; j < this.yLength; j++){
+        let index = this.coord( i, j );
+        if ( !this.hasMine[ index ] && !this.isOpen[ index ]){
+          isAllNumberOpened = false;
+          return;
+        }
+      }
+    }
+    return isAllNumberOpened;
+  }
+  startTimeCounting(){
+    this.nIntervalId = setInterval(
+      ()=>{
+        this.time = this.time + 0.1;
+      },
+      100
+    )
+  }
+  stopTime(){
+    clearInterval( this.nIntervalId);
+  }
+  ngOnInit(){
+    this.initGame();
   }
 }

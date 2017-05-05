@@ -1,4 +1,6 @@
-<span class="grid"
-      (contextmenu)="onClick()"
+<button class="grid"
+      (contextmenu)="onRightClick()"
       (click)="onLeftClick()"
-      [ngStyle]="currentStyles" > {{count}}</span>
+      [ngStyle]="currentStyles" >
+  {{currentText}}
+</button>
